@@ -97,4 +97,4 @@ setuptools.setup(
     description="Bindings for CudaSift library",
     name="cudasift",
     packages=["cudasift"],
-    version="0.1.2")
+    version="0.1.3")
