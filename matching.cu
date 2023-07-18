@@ -66,7 +66,7 @@ __global__ void MatchSiftPoints2(SiftPoint *sift1, SiftPoint *sift2, float *corr
 __global__ void FindMaxCorr(float *corrData, SiftPoint *sift1, SiftPoint *sift2, int numPts1, int corrWidth, int siftSize)
 {
   __shared__ float maxScore[16*16];
-  __shared__ float maxScor2[16*16];
+  __shared__ float maxScore2[16*16];
   __shared__ int maxIndex[16*16];
   const int tx = threadIdx.x;
   const int ty = threadIdx.y;
@@ -74,47 +74,47 @@ __global__ void FindMaxCorr(float *corrData, SiftPoint *sift1, SiftPoint *sift2,
   int p1 = blockIdx.x*16 + threadIdx.y;
   p1 = (p1>=numPts1 ? numPts1-1 : p1);
   maxScore[idx] = -1.0f;
-  maxScor2[idx] = -1.0f;
+  maxScore2[idx] = -1.0f;
   maxIndex[idx] = -1;
   __syncthreads();
   float *corrs = &corrData[p1*corrWidth];
   for (int i=tx;i<corrWidth;i+=16) {
     float val = corrs[i];
     if (val>maxScore[idx]) {
-      maxScor2[idx] = maxScore[idx];
+      maxScore2[idx] = maxScore[idx];
       maxScore[idx] = val;
       maxIndex[idx] = i;
-    } else if (val>maxScor2[idx])
-      maxScor2[idx] = val;
+    } else if (val>maxScore2[idx])
+      maxScore2[idx] = val;
   }
   //if (p1==1)
   //  printf("tx = %d, score = %.2f, scor2 = %.2f, index = %d\n", 
-  //	   tx, maxScore[idx], maxScor2[idx], maxIndex[idx]);
+  //	   tx, maxScore[idx], maxScore2[idx], maxIndex[idx]);
   __syncthreads();
   for (int len=8;len>0;len/=2) {
     if (tx<8) {
       float val = maxScore[idx+len];
       int i = maxIndex[idx+len];
       if (val>maxScore[idx]) {
-	maxScor2[idx] = maxScore[idx];
+	maxScore2[idx] = maxScore[idx];
 	maxScore[idx] = val;
 	maxIndex[idx] = i;
-      } else if (val>maxScor2[idx])
-	maxScor2[idx] = val;
-      float va2 = maxScor2[idx+len];
-      if (va2>maxScor2[idx])
-	maxScor2[idx] = va2;
+      } else if (val>maxScore2[idx])
+	maxScore2[idx] = val;
+      float va2 = maxScore2[idx+len];
+      if (va2>maxScore2[idx])
+	maxScore2[idx] = va2;
     }
     __syncthreads();
     //if (p1==1 && tx<len) 
     //  printf("tx = %d, score = %.2f, scor2 = %.2f, index = %d\n", 
-    //	     tx, maxScore[idx], maxScor2[idx], maxIndex[idx]);
+    //	     tx, maxScore[idx], maxScore2[idx], maxIndex[idx]);
   }
   if (tx==6)
     sift1[p1].score = maxScore[ty*16];
   if (tx==7)
-    // sift1[p1].ambiguity = maxScor2[ty*16] / (maxScore[ty*16] + 1e-6);
-    sift1[p1].ambiguity = (1 - maxScor[ty*16]) / (1 - maxScore2[ty*16] + 1e-6);
+    // sift1[p1].ambiguity = maxScore2[ty*16] / (maxScore[ty*16] + 1e-6);
+    sift1[p1].ambiguity = (1 - maxScore[ty*16]) / (1 - maxScore2[ty*16] + 1e-6);
   if (tx==8)
     sift1[p1].match = maxIndex[ty*16];
   if (tx==9)
