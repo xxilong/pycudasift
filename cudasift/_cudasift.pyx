@@ -281,8 +281,9 @@ cdef class PySiftData:
             size_t data_size
             np.ndarray[np.float32_t, ndim=2, mode='c'] tmp
         
+        stride = int(sizeof(SiftPoint) / sizeof(float))
         tmp = np.ascontiguousarray(np.zeros(
-            (size, sizeof(SiftPoint) / sizeof(float)),
+            (size, stride),
             dtype="f%d" % sizeof(float)))
         pts = <SiftPoint *>tmp.data          
         xpos_off = <size_t>(&pts.xpos - <float *>pts)
