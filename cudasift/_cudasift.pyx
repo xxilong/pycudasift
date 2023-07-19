@@ -145,7 +145,7 @@ cdef class PySiftData:
                 score=empty, ambiguity=empty, match=np.zeros(0, int),
                 match_xpos=empty, match_ypos=empty, match_error=empty,
                 subsampling=empty)), np.zeros((0, 128), np.float32)
-        stride = sizeof(SiftPoint) / sizeof(float)
+        stride = int(sizeof(SiftPoint) / sizeof(float))
         dtype = np.dtype("f%d" % sizeof(float))
         h_data = np.ascontiguousarray(np.zeros((nKeypoints, stride), dtype))
         match_data = np.ascontiguousarray(np.zeros(nKeypoints, np.int32))
@@ -215,8 +215,8 @@ cdef class PySiftData:
                 sharpness=empty, edgeness=empty, orientation=empty,
                 score=empty, ambiguity=empty, match=np.zeros(0, int),
                 match_xpos=empty, match_ypos=empty, match_error=empty,
-                subsampling=empty)), np.zeros((0, 128), np.float32)
-        stride = sizeof(SiftPoint) / sizeof(float)
+                subsampling=empty))
+        stride = int(sizeof(SiftPoint) / sizeof(float))
         dtype = np.dtype("f%d" % sizeof(float))
         h_data = np.ascontiguousarray(np.zeros((nKeypoints, stride), dtype))
         match_data = np.ascontiguousarray(np.zeros(nKeypoints, np.int32))
